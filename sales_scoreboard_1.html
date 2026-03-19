@@ -96,7 +96,7 @@
 
   .rep-row {
     display:grid;
-    grid-template-columns: 48px 1fr 120px 110px 90px 80px;
+    grid-template-columns: 48px 180px 1fr 110px 90px 80px;
     align-items:center; gap:12px;
     padding:10px 16px;
     background:var(--surface); border:1px solid var(--border);
@@ -212,13 +212,13 @@
   </div>
   <div class="header-kpis">
     <div class="kpi">
-      <div class="kpi-val gold" id="kpi-revenue">$0</div>
-      <div class="kpi-label">Team Revenue</div>
+      <div class="kpi-val gold" id="kpi-revenue">0</div>
+      <div class="kpi-label">Total Deals MTD</div>
     </div>
     <div class="kpi-divider"></div>
     <div class="kpi">
       <div class="kpi-val" id="kpi-deals">0</div>
-      <div class="kpi-label">Total Deals</div>
+      <div class="kpi-label">Completed</div>
     </div>
     <div class="kpi-divider"></div>
     <div class="kpi">
@@ -316,10 +316,28 @@ function fmtMoney(n) {
 }
 function fmtMoneyFull(n) { return '$' + (n||0).toLocaleString(); }
 
+// Excluded reps — IST team + non-OST entries
+const EXCLUDE = new Set([
+  'hunter','joanna','sommer','ist','angelo','chris','lara',
+  'rod','lynton','ice','lenard','staff','kimberly','alion','kass','reg'
+]);
+
 function render(rows) {
+  // Find total row first (for team-level show rate from col F)
+  const totalRow = rows.find(r => {
+    const name = (r['sales rep'] || Object.values(r)[0] || '').toLowerCase().trim();
+    return name === 'total';
+  });
+
   const data = rows.filter(r => {
-    const name = r['sales rep'] || r['rep'] || Object.values(r)[0] || '';
-    return name && name.toLowerCase() !== 'total' && name.trim() !== '' && name !== '0' && !/^\d+$/.test(name.trim());
+    const name = (r['sales rep'] || r['rep'] || Object.values(r)[0] || '').trim();
+    const nameLower = name.toLowerCase();
+    return name
+      && nameLower !== 'total'
+      && name !== '0'
+      && !/^\d+$/.test(name)
+      && !EXCLUDE.has(nameLower)
+      && !nameLower.startsWith('ist');
   });
 
   if (!data.length) {
@@ -344,19 +362,26 @@ function render(rows) {
     showPct:    parsePct(r[showKey]),
     totalDeals: parseInt(r[dealsKey]) || 0,
     convPct:    parsePct(r[convKey]),
-  })).filter(r => r.name && r.name !== '0' && r.name.toLowerCase() !== 'total' && !/^\d+$/.test(r.name.trim()));
+  })).filter(r => {
+    const n = r.name.trim().toLowerCase();
+    return r.name && r.name !== '0' && n !== 'total' && !/^\d+$/.test(r.name.trim()) && !EXCLUDE.has(n) && !n.startsWith('ist');
+  });
 
   reps.sort((a,b) => b.revenue - a.revenue);
 
-  const maxRev      = reps[0]?.revenue || 1;
-  const teamRev     = reps.reduce((s,r) => s+r.revenue, 0);
-  const teamDeals   = reps.reduce((s,r) => s+r.totalDeals, 0);
-  const teamBk      = reps.reduce((s,r) => s+r.bookings, 0);
-  const showRates   = reps.filter(r => r.showPct !== null).map(r => r.showPct);
-  const avgShow     = showRates.length ? Math.round(showRates.reduce((a,b)=>a+b,0)/showRates.length) : 0;
+  const maxRev    = reps[0]?.revenue || 1;
+  const teamDeals = reps.reduce((s,r) => s+r.totalDeals, 0);
+  const teamBk    = reps.reduce((s,r) => s+r.bookings, 0);
 
-  document.getElementById('kpi-revenue').textContent  = fmtMoneyFull(teamRev);
-  document.getElementById('kpi-deals').textContent    = teamDeals;
+  // Use team total row show rate from col F if available, else average reps
+  const teamShowRaw = totalRow ? parsePct(totalRow[showKey]) : null;
+  const showRates   = reps.filter(r => r.showPct !== null).map(r => r.showPct);
+  const avgShow     = teamShowRaw !== null ? Math.round(teamShowRaw) :
+                      (showRates.length ? Math.round(showRates.reduce((a,b)=>a+b,0)/showRates.length) : 0);
+
+  const teamCompleted = reps.reduce((s,r) => s+r.completed, 0);
+  document.getElementById('kpi-revenue').textContent  = teamDeals;
+  document.getElementById('kpi-deals').textContent    = teamCompleted;
   document.getElementById('kpi-show').textContent     = avgShow + '%';
   document.getElementById('kpi-bookings').textContent = teamBk;
 
