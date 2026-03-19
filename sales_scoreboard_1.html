@@ -72,7 +72,7 @@
     display: grid;
     grid-template-columns: 55% 45%;
     overflow: hidden;
-    padding-bottom: 50vh;
+    padding-bottom: 52vh;
   }
 
   /* ── LEFT: LEADERBOARD ── */
@@ -85,7 +85,7 @@
     font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px;
     color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;
   }
-  .rep-list { display:flex; flex-direction:column; gap:5px; flex:1; overflow:hidden; }
+  .rep-list { display:flex; flex-direction:column; gap:3px; flex:1; overflow:hidden; }
 
   /* Rep row with outlined cells */
   .rep-row {
@@ -107,7 +107,7 @@
   .rep-row.r3 { border-color: rgba(160,120,90,0.2); }
 
   .cell {
-    padding: 8px 10px;
+    padding: 6px 10px;
     display: flex; flex-direction:column; justify-content:center;
     border-right: 1px solid var(--border);
     position: relative;
@@ -118,7 +118,7 @@
     background: rgba(255,255,255,0.02);
     min-width: 36px;
   }
-  .cell.name-cell { padding: 8px 12px; }
+  .cell.name-cell { padding: 6px 12px; }
 
   .rank-num {
     font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:1px; line-height:1;
@@ -245,7 +245,7 @@
   .pace-overlay {
     position: fixed;
     bottom: 44px; left: 0; right: 0;
-    height: 50vh;
+    height: 52vh;
     background: var(--bg);
     border-top: 2px solid var(--border);
     transition: border-top-color 1s ease;
@@ -257,7 +257,7 @@
   .pace-block {
     padding: 20px 36px;
     border-right: 1px solid var(--border);
-    display: flex; flex-direction:column; justify-content:center;
+    display: flex; flex-direction:column; justify-content:flex-start; padding-top:24px;
   }
   .pace-block:last-child { border-right:none; }
   .pace-lbl {
@@ -412,14 +412,24 @@
     <div class="pace-sub" id="pace-deals-sub">— of 200 deals</div>
     <div class="pace-bar-wrap"><div class="pace-bar deals-bar" id="pace-deals-bar"></div></div>
   </div>
-  <div class="pace-block pace-status-block">
-    <div class="pace-delta-lbl" id="pace-status-label">Pace Status</div>
+  <div class="pace-block">
+    <div class="pace-lbl" id="pace-status-label">Pace Status</div>
     <div class="pace-delta-big" id="pace-delta">—</div>
     <div class="pace-note" id="pace-note">Calculating...</div>
+    <svg id="pace-graph" viewBox="0 0 300 60" width="100%" style="margin-top:14px;display:block;" preserveAspectRatio="none">
+      <!-- Target pace line (blue) -->
+      <polyline id="pace-target-line" points="" fill="none" stroke="#40c4ff" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>
+      <!-- Actual deals line (gold/green/red) -->
+      <polyline id="pace-actual-line" points="" fill="none" stroke="#f0b429" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Today dot -->
+      <circle id="pace-today-dot" cx="0" cy="0" r="4" fill="#f0b429" stroke="var(--bg)" stroke-width="1.5"/>
+      <!-- End of month target dot -->
+      <circle cx="300" cy="0" r="3" fill="#40c4ff" opacity="0.5" id="pace-end-dot"/>
+    </svg>
   </div>
   <div class="pace-block">
     <div class="pace-lbl">Team Conversion</div>
-    <div class="pace-big" id="pace-conv" style="color:var(--text-mid)">—</div>
+    <div class="pace-big green" id="pace-conv" style="color:var(--text-mid)">—</div>
     <div class="pace-sub">Bookings → Sign Ups</div>
     <div class="pace-bar-wrap"><div class="pace-bar month-bar" id="pace-conv-bar" style="background:var(--green)"></div></div>
   </div>
@@ -682,6 +692,44 @@ function render(rows) {
     const db = document.getElementById('pace-deals-bar');
     if (mb) mb.style.width = monthPct + '%';
     if (db) { db.style.width = Math.min(dealsPct, 100) + '%'; if (!isAhead) db.classList.add('behind-bar'); }
+
+    // Draw pace line graph
+    const W = 300, H = 60, PAD = 4;
+    const graphMax = DEAL_GOAL * 1.05; // slight headroom above goal
+
+    function toX(day) { return ((day - 1) / (daysInMonth - 1)) * (W - PAD*2) + PAD; }
+    function toY(deals) { return H - PAD - (deals / graphMax) * (H - PAD*2); }
+
+    // Target pace line: day 1 = 0, last day = 200
+    const targetPts = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      targetPts.push(toX(d) + ',' + toY((d / daysInMonth) * DEAL_GOAL).toFixed(1));
+    }
+
+    // Actual line: straight from day 1 = 0 to today = totalDealsVal
+    // We only have today's number, so draw as a line from start to today
+    const actualPts = [
+      PAD + ',', (H - PAD).toFixed(1),  // day 1, 0 deals
+      toX(dayOfMonth).toFixed(1) + ',' + toY(totalDealsVal).toFixed(1)
+    ].join(' ');
+    const actualPtsClean = PAD + ',' + (H - PAD).toFixed(1) + ' ' + toX(dayOfMonth).toFixed(1) + ',' + toY(totalDealsVal).toFixed(1);
+
+    const targetLine = document.getElementById('pace-target-line');
+    const actualLine = document.getElementById('pace-actual-line');
+    const todayDot   = document.getElementById('pace-today-dot');
+    const endDot     = document.getElementById('pace-end-dot');
+
+    if (targetLine) targetLine.setAttribute('points', targetPts.join(' '));
+    if (actualLine) {
+      actualLine.setAttribute('points', actualPtsClean);
+      actualLine.setAttribute('stroke', isAhead ? '#00e676' : Math.abs(delta) < 25 ? '#f0b429' : '#cc2200');
+    }
+    if (todayDot) {
+      todayDot.setAttribute('cx', toX(dayOfMonth).toFixed(1));
+      todayDot.setAttribute('cy', toY(totalDealsVal).toFixed(1));
+      todayDot.setAttribute('fill', isAhead ? '#00e676' : Math.abs(delta) < 25 ? '#f0b429' : '#cc2200');
+    }
+    if (endDot) endDot.setAttribute('cy', toY(DEAL_GOAL).toFixed(1));
   }, 800);
 
   document.getElementById('refresh-info').textContent =
