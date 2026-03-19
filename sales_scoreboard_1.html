@@ -290,17 +290,15 @@ function smartSplit(line) {
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
-  // Find real header row — scan for line containing 'sales rep'
+  // Find header row containing 'sales rep'
   let headerIdx = 0;
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].toLowerCase().includes('sales rep')) { headerIdx = i; break; }
   }
-  const headers = smartSplit(lines[headerIdx]).map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+  // Return raw positional arrays — each row is array of values by column index
+  // Col A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10, L=11, M=12, N=13
   return lines.slice(headerIdx + 1).map(line => {
-    const vals = smartSplit(line);
-    const row = {};
-    headers.forEach((h,i) => { row[h] = (vals[i]||'').trim().replace(/^"|"$/g,''); });
-    return row;
+    return smartSplit(line).map(v => v.trim().replace(/^"|"$/g,''));
   });
 }
 
@@ -325,14 +323,13 @@ const EXCLUDE = new Set([
 ]);
 
 function render(rows) {
-  // Find total row first (for team-level show rate from col F)
-  const totalRow = rows.find(r => {
-    const name = (r['sales rep'] || Object.values(r)[0] || '').toLowerCase().trim();
-    return name === 'total';
-  });
+  // POSITIONAL column access — A=0, B=1, C=2, D=3, E=4, F=5, K=10, L=11, M=12, N=13
+  // rows are arrays: row[0]=A, row[1]=B, row[2]=C ... row[13]=N
+  const totalRow = rows.find(r => (r[1]||'').toLowerCase().trim() === 'total');
+  console.log('Total row:', totalRow ? totalRow.slice(0,14) : 'not found');
 
   const data = rows.filter(r => {
-    const name = (r['sales rep'] || r['rep'] || Object.values(r)[0] || '').trim();
+    const name = (r[1] || '').trim();
     const nameLower = name.toLowerCase();
     return name
       && nameLower !== 'total'
@@ -347,32 +344,17 @@ function render(rows) {
     return;
   }
 
-  // Column map — headers start at col B (index 1). Find 'sales rep' then offset from there.
-  // B=Sales Rep, C=Bookings, D=Completed, E=NoShow, F=Show%, K=TotalDeals, L=Conv%, M=ContractValue, N=LeadScore
-  const keys = Object.keys(data[0]);
-  const nameIdx   = keys.findIndex(k => k.includes('sales rep') || k === 'rep');
-  const base      = nameIdx >= 0 ? nameIdx : 1;
-  const nameKey   = keys[base];        // B - Sales Rep
-  const bkKey     = keys[base + 1];    // C - Bookings
-  const compKey   = keys[base + 2];    // D - Completed
-  const noShowKey = keys[base + 3];    // E - No Show
-  const showKey   = keys[base + 4];    // F - Show %
-  const dealsKey  = keys[base + 9];    // K - Total Deals
-  const convKey   = keys[base + 10];   // L - Bookings:Sign Up %
-  const revKey    = keys[base + 11];   // M - Contract Value
-  const leadKey   = keys[base + 12];   // N - Average Lead Score
-  console.log('Cols:', {nameKey, bkKey, compKey, showKey, dealsKey, convKey, revKey});
-
+  // Direct positional access — no key lookup, no shifting
   const reps = data.map(r => ({
-    name:       r[nameKey] || '—',
-    revenue:    parseMoney(r[revKey]),
-    bookings:   parseInt(r[bkKey]) || 0,
-    completed:  parseInt(r[compKey]) || 0,
-    noShow:     parseInt(r[noShowKey]) || 0,
-    showPct:    parsePct(r[showKey]),
-    totalDeals: parseInt(r[dealsKey]) || 0,
-    convPct:    parsePct(r[convKey]),
-    leadScore:  parseFloat(r[leadKey]) || 0,
+    name:       r[1]  || '—',   // B - Sales Rep
+    bookings:   parseInt(r[2])  || 0,   // C - Bookings
+    completed:  parseInt(r[3])  || 0,   // D - Completed
+    noShow:     parseInt(r[4])  || 0,   // E - No Show
+    showPct:    parsePct(r[5]),          // F - Show %
+    totalDeals: parseInt(r[10]) || 0,   // K - Total Deals
+    convPct:    parsePct(r[11]),         // L - Bookings:Sign Up %
+    revenue:    parseMoney(r[12]),       // M - Contract Value
+    leadScore:  parseFloat(r[13]) || 0, // N - Average Lead Score
   })).filter(r => {
     const n = r.name.trim().toLowerCase();
     return r.name && r.name !== '0' && n !== 'total' && !/^\d+$/.test(r.name.trim()) && !EXCLUDE.has(n) && !n.startsWith('ist');
@@ -382,10 +364,10 @@ function render(rows) {
 
   const maxRev    = reps[0]?.revenue || 1;
   const teamDeals    = reps.reduce((s,r) => s+r.totalDeals, 0);
-  const teamBk       = totalRow ? (parseInt(totalRow[bkKey]) || reps.reduce((s,r) => s+r.bookings, 0)) : reps.reduce((s,r) => s+r.bookings, 0);
+  const teamBk       = totalRow ? (parseInt(totalRow[2]) || reps.reduce((s,r) => s+r.bookings, 0)) : reps.reduce((s,r) => s+r.bookings, 0);
 
-  // Use team total row show rate from col F if available, else average reps
-  const teamShowRaw = totalRow ? parsePct(totalRow[showKey]) : null;
+  // Team show rate from total row col F (index 5)
+  const teamShowRaw = totalRow ? parsePct(totalRow[5]) : null;
   const showRates   = reps.filter(r => r.showPct !== null).map(r => r.showPct);
   const avgShow     = teamShowRaw !== null ? Math.round(teamShowRaw) :
                       (showRates.length ? Math.round(showRates.reduce((a,b)=>a+b,0)/showRates.length) : 0);
@@ -496,18 +478,18 @@ function render(rows) {
   document.getElementById('ticker-inner').innerHTML = all.map(t =>
     `<div class="ticker-item"><div class="dot"></div>${t}</div>`).join('');
 
-  // Team conversion from total row col L
+  // Team conversion from total row col L (index 11)
   const teamConvEl = document.getElementById('team-conv');
   if (teamConvEl && totalRow) {
-    const tc = parsePct(totalRow[convKey]);
+    const tc = parsePct(totalRow[11]);
     teamConvEl.textContent = tc !== null ? tc.toFixed(1) + '%' : '—';
   }
 
-  // Team total deals from K42 (total row, dealsKey)
+  // Team total deals from K42 (index 10), completed from D (index 3)
   if (totalRow) {
-    const tdVal = parseInt(totalRow[dealsKey]) || teamDeals;
+    const tdVal = parseInt(totalRow[10]) || teamDeals;
     document.getElementById('kpi-revenue').textContent = tdVal;
-    document.getElementById('kpi-deals').textContent   = parseInt(totalRow[compKey]) || reps.reduce((s,r)=>s+r.completed,0);
+    document.getElementById('kpi-deals').textContent   = parseInt(totalRow[3]) || reps.reduce((s,r)=>s+r.completed,0);
   }
 
   document.getElementById('refresh-info').textContent =
