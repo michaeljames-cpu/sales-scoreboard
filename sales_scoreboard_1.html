@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -288,8 +289,13 @@ function smartSplit(line) {
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
-  const headers = smartSplit(lines[0]).map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
-  return lines.slice(1).map(line => {
+  // Find real header row — scan for line containing 'sales rep'
+  let headerIdx = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].toLowerCase().includes('sales rep')) { headerIdx = i; break; }
+  }
+  const headers = smartSplit(lines[headerIdx]).map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(headerIdx + 1).map(line => {
     const vals = smartSplit(line);
     const row = {};
     headers.forEach((h,i) => { row[h] = (vals[i]||'').trim().replace(/^"|"$/g,''); });
