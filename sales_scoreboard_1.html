@@ -319,7 +319,8 @@ function fmtMoneyFull(n) { return '$' + (n||0).toLocaleString(); }
 // Excluded reps — IST team + non-OST entries
 const EXCLUDE = new Set([
   'hunter','joanna','sommer','ist','angelo','chris','lara',
-  'rod','lynton','ice','lenard','staff','kimberly','alion','kass','reg'
+  'rod','red','lynton','ice','lenard','staff','steff','steph',
+  'kimberly','kemberly','alion','aljon','kass','reg'
 ]);
 
 function render(rows) {
@@ -345,23 +346,28 @@ function render(rows) {
     return;
   }
 
+  // Column map (0-indexed): A=0 B=1 C=2 D=3 E=4 F=5 G=6 H=7 I=8 J=9 K=10 L=11 M=12 N=13
   const keys = Object.keys(data[0]);
-  const nameKey   = keys.find(k => k.includes('sales rep') || k === 'rep') || keys[0];
-  const revKey    = keys.find(k => k.includes('contract value')) || keys.find(k => k.includes('revenue')) || '';
-  const bkKey     = keys.find(k => k === 'bookings') || '';
-  const compKey   = keys.find(k => k.includes('completed')) || '';
-  const showKey   = keys.find(k => k.includes('show %') || k === 'show%') || '';
-  const dealsKey  = keys.find(k => k.includes('total deals')) || '';
-  const convKey   = keys.find(k => k.includes('bookings') && k.includes('sign')) || '';
+  const nameKey   = keys[0];   // A - Sales Rep
+  const bkKey     = keys[2];   // C - Bookings
+  const compKey   = keys[3];   // D - Completed
+  const noShowKey = keys[4];   // E - No Show
+  const showKey   = keys[5];   // F - Show %
+  const dealsKey  = keys[9];   // J - Total Deals (col J = index 9)
+  const convKey   = keys[11];  // L - Bookings:Sign Up %
+  const revKey    = keys[12];  // M - Contract Value
+  const leadKey   = keys[13];  // N - Average Lead Score
 
   const reps = data.map(r => ({
     name:       r[nameKey] || '—',
     revenue:    parseMoney(r[revKey]),
     bookings:   parseInt(r[bkKey]) || 0,
     completed:  parseInt(r[compKey]) || 0,
+    noShow:     parseInt(r[noShowKey]) || 0,
     showPct:    parsePct(r[showKey]),
     totalDeals: parseInt(r[dealsKey]) || 0,
     convPct:    parsePct(r[convKey]),
+    leadScore:  parseFloat(r[leadKey]) || 0,
   })).filter(r => {
     const n = r.name.trim().toLowerCase();
     return r.name && r.name !== '0' && n !== 'total' && !/^\d+$/.test(r.name.trim()) && !EXCLUDE.has(n) && !n.startsWith('ist');
@@ -370,8 +376,8 @@ function render(rows) {
   reps.sort((a,b) => b.revenue - a.revenue);
 
   const maxRev    = reps[0]?.revenue || 1;
-  const teamDeals = reps.reduce((s,r) => s+r.totalDeals, 0);
-  const teamBk    = reps.reduce((s,r) => s+r.bookings, 0);
+  const teamDeals    = reps.reduce((s,r) => s+r.totalDeals, 0);
+  const teamBk       = totalRow ? (parseInt(totalRow[bkKey]) || reps.reduce((s,r) => s+r.bookings, 0)) : reps.reduce((s,r) => s+r.bookings, 0);
 
   // Use team total row show rate from col F if available, else average reps
   const teamShowRaw = totalRow ? parsePct(totalRow[showKey]) : null;
@@ -443,7 +449,7 @@ function render(rows) {
   const showList = document.getElementById('show-list');
   showList.innerHTML = '';
   [...reps].filter(r => r.showPct !== null)
-    .sort((a,b) => b.showPct - a.showPct).slice(0,7)
+    .sort((a,b) => b.showPct - a.showPct)
     .forEach(rep => {
       const d = document.createElement('div');
       d.className = 'show-row';
@@ -458,7 +464,7 @@ function render(rows) {
   // Conversion panel
   const convList = document.getElementById('conv-list');
   convList.innerHTML = '';
-  [...reps].sort((a,b) => (b.convPct||0)-(a.convPct||0)).slice(0,7)
+  [...reps].sort((a,b) => (b.convPct||0)-(a.convPct||0))
     .forEach(rep => {
       const zero = !rep.convPct;
       const d = document.createElement('div');
@@ -475,6 +481,7 @@ function render(rows) {
     if (r.revenue > 0) items.push(`<strong>${r.name}</strong> &middot; <span class="amt">${fmtMoneyFull(r.revenue)}</span>`);
     if (r.totalDeals > 0) items.push(`<strong>${r.name}</strong> &middot; ${r.totalDeals} deal${r.totalDeals!==1?'s':''}`);
     if (r.showPct !== null && r.showPct >= 70) items.push(`<strong>${r.name}</strong> &middot; ${r.showPct}% show rate 🔥`);
+    if (r.leadScore > 0) items.push(`<strong>${r.name}</strong> &middot; avg lead score ${r.leadScore.toFixed(2)}`);
   });
   if (!items.length) items.push('<strong>No deals recorded yet</strong> &middot; Keep pushing');
 
