@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Floor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0e1219;
+    --surface2: #141c27;
+    --border: #1c2736;
+    --border2: #243344;
+    --gold: #f0b429;
+    --green: #00e676;
+    --green-dim: #00c853;
+    --blue: #40c4ff;
+    --red: #ff5252;
+    --text: #e4eaf2;
+    --text-dim: #6b8099;
+    --text-mid: #9ab0c4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: 88px 1fr 56px;
+    grid-template-columns: 1fr 320px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(240,180,41,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 85% 100%, rgba(64,196,255,0.04) 0%, transparent 60%);
+  }
+
+  /* HEADER */
+  header {
+    grid-column: 1/-1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 36px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(14,18,25,0.95);
+  }
+  .brand { display:flex; align-items:baseline; gap:16px; }
+  .brand-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem; letter-spacing: 6px; color: var(--gold); line-height:1;
+  }
+  .brand-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 3px; color: var(--text-dim); text-transform:uppercase;
+  }
+  .header-kpis { display:flex; gap:48px; align-items:center; }
+  .kpi { text-align:center; }
+  .kpi-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 2px; line-height:1; color: var(--green);
+  }
+  .kpi-val.gold { color: var(--gold); }
+  .kpi-val.blue { color: var(--blue); }
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 2.5px; color: var(--text-dim);
+    text-transform: uppercase; margin-top: 3px;
+  }
+  .kpi-divider { width:1px; height:40px; background:var(--border2); }
+  .live-pill {
+    display:flex; align-items:center; gap:8px;
+    background: rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2);
+    border-radius:20px; padding:6px 14px;
+    font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:2px;
+    color:var(--green); text-transform:uppercase;
+  }
+  .live-dot {
+    width:7px; height:7px; border-radius:50%; background:var(--green);
+    animation: livepulse 2s ease-in-out infinite;
+  }
+  @keyframes livepulse {
+    0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)}
+  }
+
+  /* MAIN */
+  main {
+    grid-column:1; padding:20px 20px 20px 36px;
+    overflow:hidden; display:flex; flex-direction:column; gap:0;
+  }
+  .section-head {
+    font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:3px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; padding-left:2px;
+  }
+  .rep-list { display:flex; flex-direction:column; gap:6px; flex:1; overflow:hidden; }
+
+  .rep-row {
+    display:grid;
+    grid-template-columns: 48px 1fr 120px 110px 90px 80px;
+    align-items:center; gap:12px;
+    padding:10px 16px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; position:relative; overflow:hidden;
+    opacity:0; transform:translateX(-16px);
+  }
+  .rep-row.visible { animation: rowIn 0.4s ease forwards; }
+  @keyframes rowIn { to { opacity:1; transform:translateX(0); } }
+  .rep-row::after {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px;
+  }
+  .rep-row.r1::after { background:var(--gold); }
+  .rep-row.r2::after { background:#b0bec5; }
+  .rep-row.r3::after { background:#a0785a; }
+  .rep-row.rother::after { background:var(--border2); }
+  .rep-row.r1 {
+    background:linear-gradient(90deg,rgba(240,180,41,0.07) 0%,var(--surface) 35%);
+    border-color:rgba(240,180,41,0.25);
+  }
+  .rep-row.r2 { background:linear-gradient(90deg,rgba(176,190,197,0.05) 0%,var(--surface) 35%); }
+
+  .rank-badge {
+    font-family:'Bebas Neue',sans-serif; font-size:1.6rem;
+    letter-spacing:1px; text-align:center; line-height:1;
+  }
+  .r1 .rank-badge { color:var(--gold); }
+  .r2 .rank-badge { color:#b0bec5; }
+  .r3 .rank-badge { color:#a0785a; }
+  .rother .rank-badge { color:var(--text-dim); }
+
+  .rep-name { font-size:1rem; font-weight:700; color:var(--text); letter-spacing:0.3px; }
+  .rep-bar-wrap { height:2px; background:var(--border2); border-radius:2px; margin-top:5px; overflow:hidden; }
+  .rep-bar { height:100%; border-radius:2px; background:var(--green-dim); width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .r1 .rep-bar { background:var(--gold); }
+  .r2 .rep-bar { background:#b0bec5; }
+  .r3 .rep-bar { background:#a0785a; }
+
+  .metric-cell { text-align:right; }
+  .metric-val { font-family:'DM Mono',monospace; font-size:0.95rem; font-weight:500; color:var(--text); }
+  .metric-val.highlight { color:var(--green); }
+  .metric-val.gold-text { color:var(--gold); }
+  .metric-label { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-top:2px; }
+
+  /* ASIDE */
+  aside {
+    grid-column:2; border-left:1px solid var(--border);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .side-block { padding:18px 20px; border-bottom:1px solid var(--border); }
+  .side-title {
+    font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:14px;
+  }
+  .top-card {
+    background:linear-gradient(135deg,rgba(240,180,41,0.1),rgba(240,180,41,0.03));
+    border:1px solid rgba(240,180,41,0.2); border-radius:8px;
+    padding:14px 16px; text-align:center;
+  }
+  .top-crown { font-size:1.4rem; margin-bottom:4px; }
+  .top-name { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:3px; color:var(--gold); line-height:1; }
+  .top-value { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-mid); margin-top:4px; }
+
+  .show-list { display:flex; flex-direction:column; gap:8px; }
+  .show-row { display:flex; align-items:center; gap:8px; }
+  .show-name { font-size:0.75rem; font-weight:500; color:var(--text-mid); width:64px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .show-bar-wrap { flex:1; height:6px; background:var(--border2); border-radius:3px; overflow:hidden; }
+  .show-bar { height:100%; border-radius:3px; background:var(--blue); width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .show-pct { font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--text-mid); width:34px; text-align:right; flex-shrink:0; }
+
+  .conv-list { display:flex; flex-direction:column; gap:7px; }
+  .conv-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .conv-name { font-size:0.75rem; font-weight:500; color:var(--text-mid); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
+  .conv-badge {
+    font-family:'DM Mono',monospace; font-size:0.7rem; padding:2px 8px; border-radius:10px;
+    background:rgba(0,230,118,0.1); color:var(--green); border:1px solid rgba(0,230,118,0.2); flex-shrink:0;
+  }
+  .conv-badge.zero { background:rgba(107,128,153,0.1); color:var(--text-dim); border-color:var(--border2); }
+
+  /* FOOTER TICKER */
+  footer {
+    grid-column:1/-1; border-top:1px solid var(--border); background:var(--surface);
+    display:flex; align-items:center; padding:0 24px; gap:16px; overflow:hidden;
+  }
+  .ticker-label {
+    font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:3px; color:var(--gold);
+    text-transform:uppercase; flex-shrink:0; background:rgba(240,180,41,0.1);
+    border:1px solid rgba(240,180,41,0.2); padding:4px 10px; border-radius:4px;
+  }
+  .ticker-track { flex:1; overflow:hidden; position:relative; height:100%; display:flex; align-items:center; }
+  .ticker-inner { display:flex; gap:48px; white-space:nowrap; animation:tickerScroll 30s linear infinite; }
+  @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  .ticker-item {
+    font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text-mid);
+    display:flex; align-items:center; gap:8px; flex-shrink:0;
+  }
+  .ticker-item .dot { width:4px; height:4px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+  .ticker-item strong { color:var(--text); font-weight:700; }
+  .ticker-item .amt { color:var(--green); }
+  .refresh-info { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1.5px; color:var(--text-dim); flex-shrink:0; text-transform:uppercase; }
+
+  .status-msg { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-dim); padding:20px; text-align:center; }
+  .error-msg { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--red); padding:20px; text-align:center; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .loading { animation:blink 1.4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-title">SALES FLOOR</div>
+    <div class="brand-date" id="date-display">—</div>
+  </div>
+  <div class="header-kpis">
+    <div class="kpi">
+      <div class="kpi-val gold" id="kpi-revenue">$0</div>
+      <div class="kpi-label">Team Revenue</div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi">
+      <div class="kpi-val" id="kpi-deals">0</div>
+      <div class="kpi-label">Total Deals</div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi">
+      <div class="kpi-val blue" id="kpi-show">0%</div>
+      <div class="kpi-label">Avg Show Rate</div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi">
+      <div class="kpi-val" id="kpi-bookings">0</div>
+      <div class="kpi-label">Total Bookings</div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="live-pill"><div class="live-dot"></div>Live</div>
+  </div>
+</header>
+
+<main>
+  <div class="section-head">Leaderboard — Contract Value</div>
+  <div class="rep-list" id="rep-list">
+    <div class="status-msg loading">Connecting to live data...</div>
+  </div>
+</main>
+
+<aside>
+  <div class="side-block">
+    <div class="side-title">Top Performer</div>
+    <div class="top-card">
+      <div class="top-crown">👑</div>
+      <div class="top-name" id="top-name">—</div>
+      <div class="top-value" id="top-value">—</div>
+    </div>
+  </div>
+  <div class="side-block">
+    <div class="side-title">Show Rate by Rep</div>
+    <div class="show-list" id="show-list"><div class="status-msg loading" style="padding:4px 0">—</div></div>
+  </div>
+  <div class="side-block" style="border-bottom:none;flex:1;overflow:hidden;">
+    <div class="side-title">Conversion — Bookings → Sign Ups</div>
+    <div class="conv-list" id="conv-list"><div class="status-msg loading" style="padding:4px 0">—</div></div>
+  </div>
+</aside>
+
+<footer>
+  <div class="ticker-label">Today</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="ticker-inner">
+      <div class="ticker-item"><div class="dot"></div>Loading live feed...</div>
+    </div>
+  </div>
+  <div class="refresh-info" id="refresh-info">Refreshing every 60s</div>
+</footer>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNuIJtjBejCFgWL0wa_seIvejU0TQ9UPz5NMlFzxqjnJue_T--glLsFAK3y4GOGWSv5DJDlgOAmxpm/pub?gid=845071024&single=true&output=csv';
+const REFRESH_MS = 60000;
+
+function smartSplit(line) {
+  const result = []; let current = ''; let inQ = false;
+  for (const ch of line) {
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { result.push(current); current = ''; }
+    else { current += ch; }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = smartSplit(lines[0]).map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = smartSplit(line);
+    const row = {};
+    headers.forEach((h,i) => { row[h] = (vals[i]||'').trim().replace(/^"|"$/g,''); });
+    return row;
+  });
+}
+
+function parseMoney(v) { return v ? parseFloat(v.replace(/[$,\s]/g,'')) || 0 : 0; }
+function parsePct(v) {
+  if (!v || v === '-' || v.trim() === '') return null;
+  return parseFloat(v.replace('%','')) || 0;
+}
+function fmtMoney(n) {
+  if (!n) return '$0';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + (n/1000).toFixed(1) + 'k';
+  return '$' + n.toLocaleString();
+}
+function fmtMoneyFull(n) { return '$' + (n||0).toLocaleString(); }
+
+function render(rows) {
+  const data = rows.filter(r => {
+    const name = r['sales rep'] || r['rep'] || Object.values(r)[0] || '';
+    return name && name.toLowerCase() !== 'total' && name.trim() !== '' && name !== '0' && !/^\d+$/.test(name.trim());
+  });
+
+  if (!data.length) {
+    document.getElementById('rep-list').innerHTML = '<div class="error-msg">No rep data found — check that the published CSV URL points to the OST tab.</div>';
+    return;
+  }
+
+  const keys = Object.keys(data[0]);
+  const nameKey   = keys.find(k => k.includes('sales rep') || k === 'rep') || keys[0];
+  const revKey    = keys.find(k => k.includes('contract value')) || keys.find(k => k.includes('revenue')) || '';
+  const bkKey     = keys.find(k => k === 'bookings') || '';
+  const compKey   = keys.find(k => k.includes('completed')) || '';
+  const showKey   = keys.find(k => k.includes('show %') || k === 'show%') || '';
+  const dealsKey  = keys.find(k => k.includes('total deals')) || '';
+  const convKey   = keys.find(k => k.includes('bookings') && k.includes('sign')) || '';
+
+  const reps = data.map(r => ({
+    name:       r[nameKey] || '—',
+    revenue:    parseMoney(r[revKey]),
+    bookings:   parseInt(r[bkKey]) || 0,
+    completed:  parseInt(r[compKey]) || 0,
+    showPct:    parsePct(r[showKey]),
+    totalDeals: parseInt(r[dealsKey]) || 0,
+    convPct:    parsePct(r[convKey]),
+  })).filter(r => r.name && r.name !== '0' && r.name.toLowerCase() !== 'total' && !/^\d+$/.test(r.name.trim()));
+
+  reps.sort((a,b) => b.revenue - a.revenue);
+
+  const maxRev      = reps[0]?.revenue || 1;
+  const teamRev     = reps.reduce((s,r) => s+r.revenue, 0);
+  const teamDeals   = reps.reduce((s,r) => s+r.totalDeals, 0);
+  const teamBk      = reps.reduce((s,r) => s+r.bookings, 0);
+  const showRates   = reps.filter(r => r.showPct !== null).map(r => r.showPct);
+  const avgShow     = showRates.length ? Math.round(showRates.reduce((a,b)=>a+b,0)/showRates.length) : 0;
+
+  document.getElementById('kpi-revenue').textContent  = fmtMoneyFull(teamRev);
+  document.getElementById('kpi-deals').textContent    = teamDeals;
+  document.getElementById('kpi-show').textContent     = avgShow + '%';
+  document.getElementById('kpi-bookings').textContent = teamBk;
+
+  const now = new Date();
+  document.getElementById('date-display').textContent =
+    now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
+
+  if (reps[0]) {
+    document.getElementById('top-name').textContent  = reps[0].name.toUpperCase();
+    document.getElementById('top-value').textContent = fmtMoneyFull(reps[0].revenue) + ' contract value';
+  }
+
+  // Leaderboard
+  const repList = document.getElementById('rep-list');
+  repList.innerHTML = '';
+  const rcMap = ['r1','r2','r3'];
+
+  reps.forEach((rep, i) => {
+    const rc  = i < 3 ? rcMap[i] : 'rother';
+    const pct = maxRev > 0 ? (rep.revenue / maxRev * 100) : 0;
+    const showDisplay = rep.showPct !== null ? rep.showPct + '%' : '—';
+
+    const row = document.createElement('div');
+    row.className = `rep-row ${rc}`;
+    row.innerHTML = `
+      <div class="rank-badge">${i+1}</div>
+      <div>
+        <div class="rep-name">${rep.name}</div>
+        <div class="rep-bar-wrap"><div class="rep-bar" style="width:0%" data-w="${pct}"></div></div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val ${i===0?'gold-text':'highlight'}">${fmtMoneyFull(rep.revenue)}</div>
+        <div class="metric-label">Contract Value</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${rep.bookings}</div>
+        <div class="metric-label">Bookings</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${showDisplay}</div>
+        <div class="metric-label">Show Rate</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val">${rep.totalDeals}</div>
+        <div class="metric-label">Deals</div>
+      </div>`;
+    repList.appendChild(row);
+
+    setTimeout(() => {
+      row.classList.add('visible');
+      setTimeout(() => {
+        const bar = row.querySelector('.rep-bar');
+        if (bar) bar.style.width = pct + '%';
+      }, 200 + i*80);
+    }, i*80);
+  });
+
+  // Show rate panel
+  const showList = document.getElementById('show-list');
+  showList.innerHTML = '';
+  [...reps].filter(r => r.showPct !== null)
+    .sort((a,b) => b.showPct - a.showPct).slice(0,7)
+    .forEach(rep => {
+      const d = document.createElement('div');
+      d.className = 'show-row';
+      d.innerHTML = `
+        <div class="show-name">${rep.name}</div>
+        <div class="show-bar-wrap"><div class="show-bar" style="width:0%" data-w="${rep.showPct}"></div></div>
+        <div class="show-pct">${rep.showPct}%</div>`;
+      showList.appendChild(d);
+      setTimeout(() => { const b = d.querySelector('.show-bar'); if(b) b.style.width = rep.showPct+'%'; }, 700);
+    });
+
+  // Conversion panel
+  const convList = document.getElementById('conv-list');
+  convList.innerHTML = '';
+  [...reps].sort((a,b) => (b.convPct||0)-(a.convPct||0)).slice(0,7)
+    .forEach(rep => {
+      const zero = !rep.convPct;
+      const d = document.createElement('div');
+      d.className = 'conv-row';
+      d.innerHTML = `
+        <div class="conv-name">${rep.name}</div>
+        <div class="conv-badge ${zero?'zero':''}">${rep.convPct !== null ? rep.convPct.toFixed(1)+'%' : '—'}</div>`;
+      convList.appendChild(d);
+    });
+
+  // Ticker
+  const items = [];
+  reps.filter(r => r.revenue > 0 || r.totalDeals > 0).forEach(r => {
+    if (r.revenue > 0) items.push(`<strong>${r.name}</strong> &middot; <span class="amt">${fmtMoneyFull(r.revenue)}</span>`);
+    if (r.totalDeals > 0) items.push(`<strong>${r.name}</strong> &middot; ${r.totalDeals} deal${r.totalDeals!==1?'s':''}`);
+    if (r.showPct !== null && r.showPct >= 70) items.push(`<strong>${r.name}</strong> &middot; ${r.showPct}% show rate 🔥`);
+  });
+  if (!items.length) items.push('<strong>No deals recorded yet</strong> &middot; Keep pushing');
+
+  const all = [...items,...items];
+  document.getElementById('ticker-inner').innerHTML = all.map(t =>
+    `<div class="ticker-item"><div class="dot"></div>${t}</div>`).join('');
+
+  document.getElementById('refresh-info').textContent =
+    'Updated ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+async function fetchData() {
+  try {
+    const res  = await fetch(CSV_URL + '&nocache=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    render(parseCSV(text));
+  } catch(err) {
+    console.error(err);
+    document.getElementById('rep-list').innerHTML =
+      `<div class="error-msg">Could not load data.<br><small>${err.message}</small><br><br>Make sure the Google Sheet is published to web as CSV.</div>`;
+  }
+}
+
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
+</body>
+</html>
