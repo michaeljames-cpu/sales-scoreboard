@@ -156,14 +156,14 @@
     padding:14px 16px; text-align:center;
   }
   .top-crown { font-size:1.4rem; margin-bottom:4px; }
-  .top-name { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:3px; color:var(--gold); line-height:1; }
-  .top-value { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-mid); margin-top:4px; }
+  .top-name { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:3px; color:var(--gold); line-height:1; transition:opacity 0.3s ease; }
+  .top-value { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-mid); margin-top:4px; transition:opacity 0.3s ease; }
 
   .show-list { display:flex; flex-direction:column; gap:8px; }
   .show-row { display:flex; align-items:center; gap:8px; }
   .show-name { font-size:0.75rem; font-weight:500; color:var(--text-mid); width:64px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .show-bar-wrap { flex:1; height:6px; background:var(--border2); border-radius:3px; overflow:hidden; }
-  .show-bar { height:100%; border-radius:3px; background:var(--blue); width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .show-bar { height:100%; border-radius:3px; background:var(--gold); width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
   .show-pct { font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--text-mid); width:34px; text-align:right; flex-shrink:0; }
 
   .conv-list { display:flex; flex-direction:column; gap:7px; }
@@ -244,15 +244,15 @@
 
 <aside>
   <div class="side-block">
-    <div class="side-title">Top Performer</div>
+    <div class="side-title" id="top-category-label">Top Performer</div>
     <div class="top-card">
-      <div class="top-crown">👑</div>
+      <div class="top-crown" id="top-crown">👑</div>
       <div class="top-name" id="top-name">—</div>
       <div class="top-value" id="top-value">—</div>
     </div>
   </div>
   <div class="side-block">
-    <div class="side-title">Show Rate by Rep</div>
+    <div class="side-title">Deals This Month <span style="color:var(--text-dim);font-size:0.55rem;letter-spacing:1px;">/ 15 goal</span></div>
     <div class="show-list" id="show-list"><div class="status-msg loading" style="padding:4px 0">—</div></div>
   </div>
   <div class="side-block" style="border-bottom:none;flex:1;overflow:hidden;">
@@ -263,6 +263,7 @@
 
 <footer>
   <div class="ticker-label">Today</div>
+  <div style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--green);background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:4px;padding:4px 10px;flex-shrink:0;">Team Conv: <span id="team-conv">—</span></div>
   <div class="ticker-track">
     <div class="ticker-inner" id="ticker-inner">
       <div class="ticker-item"><div class="dot"></div>Loading live feed...</div>
@@ -346,17 +347,21 @@ function render(rows) {
     return;
   }
 
-  // Column map (0-indexed): A=0 B=1 C=2 D=3 E=4 F=5 G=6 H=7 I=8 J=9 K=10 L=11 M=12 N=13
+  // Column map — headers start at col B (index 1). Find 'sales rep' then offset from there.
+  // B=Sales Rep, C=Bookings, D=Completed, E=NoShow, F=Show%, K=TotalDeals, L=Conv%, M=ContractValue, N=LeadScore
   const keys = Object.keys(data[0]);
-  const nameKey   = keys[0];   // A - Sales Rep
-  const bkKey     = keys[2];   // C - Bookings
-  const compKey   = keys[3];   // D - Completed
-  const noShowKey = keys[4];   // E - No Show
-  const showKey   = keys[5];   // F - Show %
-  const dealsKey  = keys[9];   // J - Total Deals (col J = index 9)
-  const convKey   = keys[11];  // L - Bookings:Sign Up %
-  const revKey    = keys[12];  // M - Contract Value
-  const leadKey   = keys[13];  // N - Average Lead Score
+  const nameIdx   = keys.findIndex(k => k.includes('sales rep') || k === 'rep');
+  const base      = nameIdx >= 0 ? nameIdx : 1;
+  const nameKey   = keys[base];        // B - Sales Rep
+  const bkKey     = keys[base + 1];    // C - Bookings
+  const compKey   = keys[base + 2];    // D - Completed
+  const noShowKey = keys[base + 3];    // E - No Show
+  const showKey   = keys[base + 4];    // F - Show %
+  const dealsKey  = keys[base + 9];    // K - Total Deals
+  const convKey   = keys[base + 10];   // L - Bookings:Sign Up %
+  const revKey    = keys[base + 11];   // M - Contract Value
+  const leadKey   = keys[base + 12];   // N - Average Lead Score
+  console.log('Cols:', {nameKey, bkKey, compKey, showKey, dealsKey, convKey, revKey});
 
   const reps = data.map(r => ({
     name:       r[nameKey] || '—',
@@ -445,20 +450,22 @@ function render(rows) {
     }, i*80);
   });
 
-  // Show rate panel
+  // Deals vs KPI panel (gold bars, goal = 15 deals/month)
+  const DEAL_GOAL = 15;
   const showList = document.getElementById('show-list');
   showList.innerHTML = '';
-  [...reps].filter(r => r.showPct !== null)
-    .sort((a,b) => b.showPct - a.showPct)
+  [...reps].sort((a,b) => b.totalDeals - a.totalDeals)
     .forEach(rep => {
+      const pctOfGoal = Math.min((rep.totalDeals / DEAL_GOAL) * 100, 100);
+      const hitGoal = rep.totalDeals >= DEAL_GOAL;
       const d = document.createElement('div');
       d.className = 'show-row';
       d.innerHTML = `
         <div class="show-name">${rep.name}</div>
-        <div class="show-bar-wrap"><div class="show-bar" style="width:0%" data-w="${rep.showPct}"></div></div>
-        <div class="show-pct">${rep.showPct}%</div>`;
+        <div class="show-bar-wrap"><div class="show-bar" style="width:0%;${hitGoal?'background:var(--green)':''}" data-w="${pctOfGoal}"></div></div>
+        <div class="show-pct" style="${hitGoal?'color:var(--green)':''}">${rep.totalDeals}</div>`;
       showList.appendChild(d);
-      setTimeout(() => { const b = d.querySelector('.show-bar'); if(b) b.style.width = rep.showPct+'%'; }, 700);
+      setTimeout(() => { const b = d.querySelector('.show-bar'); if(b) b.style.width = pctOfGoal+'%'; }, 700);
     });
 
   // Conversion panel
@@ -489,9 +496,59 @@ function render(rows) {
   document.getElementById('ticker-inner').innerHTML = all.map(t =>
     `<div class="ticker-item"><div class="dot"></div>${t}</div>`).join('');
 
+  // Team conversion from total row col L
+  const teamConvEl = document.getElementById('team-conv');
+  if (teamConvEl && totalRow) {
+    const tc = parsePct(totalRow[convKey]);
+    teamConvEl.textContent = tc !== null ? tc.toFixed(1) + '%' : '—';
+  }
+
+  // Team total deals from K42 (total row, dealsKey)
+  if (totalRow) {
+    const tdVal = parseInt(totalRow[dealsKey]) || teamDeals;
+    document.getElementById('kpi-revenue').textContent = tdVal;
+    document.getElementById('kpi-deals').textContent   = parseInt(totalRow[compKey]) || reps.reduce((s,r)=>s+r.completed,0);
+  }
+
   document.getElementById('refresh-info').textContent =
     'Updated ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  setRotateReps(reps);
 }
+
+// Rotating top performer — cycles every 8 seconds
+let _rotateReps = [];
+let _rotateIdx  = 0;
+const ROTATE_CATEGORIES = [
+  { label: 'Top Performer — Contract Value', crown: '👑', key: r => r.revenue,    fmt: r => '$' + r.revenue.toLocaleString() + ' contract value' },
+  { label: 'Top Performer — Deals Closed',  crown: '🔥', key: r => r.totalDeals, fmt: r => r.totalDeals + ' deals closed' },
+  { label: 'Top Performer — Conversion',    crown: '⚡', key: r => r.convPct||0, fmt: r => (r.convPct||0).toFixed(1) + '% booking → sign up' },
+  { label: 'Top Performer — Show Rate',     crown: '🎯', key: r => r.showPct||0, fmt: r => (r.showPct||0) + '% show rate' },
+];
+
+function rotateTopPerformer() {
+  if (!_rotateReps.length) return;
+  const cat = ROTATE_CATEGORIES[_rotateIdx % ROTATE_CATEGORIES.length];
+  const sorted = [..._rotateReps].filter(r => cat.key(r) > 0).sort((a,b) => cat.key(b) - cat.key(a));
+  if (!sorted.length) { _rotateIdx++; rotateTopPerformer(); return; }
+  const top = sorted[0];
+  const nameEl  = document.getElementById('top-name');
+  const valEl   = document.getElementById('top-value');
+  const crownEl = document.getElementById('top-crown');
+  const labelEl = document.getElementById('top-category-label');
+  if (nameEl)  { nameEl.style.opacity  = '0'; setTimeout(() => { nameEl.textContent  = top.name.toUpperCase(); nameEl.style.opacity  = '1'; }, 300); }
+  if (valEl)   { valEl.style.opacity   = '0'; setTimeout(() => { valEl.textContent   = cat.fmt(top);           valEl.style.opacity   = '1'; }, 300); }
+  if (crownEl) crownEl.textContent = cat.crown;
+  if (labelEl) labelEl.textContent = cat.label;
+  _rotateIdx++;
+}
+
+function setRotateReps(reps) {
+  _rotateReps = reps;
+  rotateTopPerformer();
+}
+
+setInterval(rotateTopPerformer, 8000);
 
 async function fetchData() {
   try {
