@@ -282,7 +282,7 @@
     display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
   }
   .pace-delta-lbl { font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; }
-  .pace-delta-big { font-family:'Bebas Neue',sans-serif; font-size:5rem; letter-spacing:2px; line-height:1; }
+  .pace-delta-big { font-family:'Bebas Neue',sans-serif; font-size:11rem; letter-spacing:2px; line-height:1; }
   .pace-delta-big.ahead { color:var(--green); }
   .pace-delta-big.behind { color:var(--red); }
   .pace-note { font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--text-mid); margin-top:10px; line-height:1.6; max-width:240px; }
@@ -408,7 +408,7 @@
   </div>
   <div class="pace-block">
     <div class="pace-lbl">Goal Progress — 200 Deals</div>
-    <div class="pace-big" id="pace-deals-pct">—</div>
+    <div class="pace-big neutral" id="pace-deals-pct">—</div>
     <div class="pace-sub" id="pace-deals-sub">— of 200 deals</div>
     <div class="pace-bar-wrap"><div class="pace-bar deals-bar" id="pace-deals-bar"></div></div>
   </div>
@@ -679,12 +679,23 @@ function render(rows) {
 
   const dealsPctEl  = document.getElementById('pace-deals-pct');
   const deltaEl     = document.getElementById('pace-delta');
+  const paceOverlay = document.getElementById('pace-overlay');
+  const statusEl    = document.getElementById('pace-status-label');
   if (isAhead) {
-    dealsPctEl.className = 'pace-val ahead';
-    deltaEl.className = 'pace-delta-val ahead';
+    dealsPctEl.className='pace-big ahead';     dealsPctEl.style.color='';
+    deltaEl.className='pace-delta-big ahead';  deltaEl.style.color='';
+    if(statusEl) statusEl.style.color='var(--green)';
+    if(paceOverlay) paceOverlay.style.borderTopColor='rgba(0,230,118,0.4)';
+  } else if (Math.abs(delta) < 25) {
+    dealsPctEl.className='pace-big neutral';   dealsPctEl.style.color='';
+    deltaEl.className='pace-delta-big';        deltaEl.style.color='var(--gold)';
+    if(statusEl) statusEl.style.color='var(--gold)';
+    if(paceOverlay) paceOverlay.style.borderTopColor='rgba(240,180,41,0.4)';
   } else {
-    dealsPctEl.className = 'pace-val behind';
-    deltaEl.className = 'pace-delta-val behind';
+    dealsPctEl.className='pace-big';           dealsPctEl.style.color='var(--red-dark)';
+    deltaEl.className='pace-delta-big';        deltaEl.style.color='var(--red-dark)';
+    if(statusEl) statusEl.style.color='var(--red-dark)';
+    if(paceOverlay) paceOverlay.style.borderTopColor='rgba(122,0,0,0.5)';
   }
 
   setTimeout(() => {
