@@ -5,264 +5,333 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sales Floor</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #07090f;
-    --surface: #0e1219;
-    --surface2: #141c27;
+    --surface: #0d1117;
+    --surface2: #111920;
     --border: #1c2736;
     --border2: #243344;
     --gold: #f0b429;
     --green: #00e676;
     --green-dim: #00c853;
     --blue: #40c4ff;
-    --red: #ff5252;
+    --red: #ff4444;
     --text: #e4eaf2;
-    --text-dim: #6b8099;
-    --text-mid: #9ab0c4;
+    --text-dim: #5a7080;
+    --text-mid: #8aa0b4;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100vw; height:100vh; overflow:hidden; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    width: 100vw; height: 100vh;
-    overflow: hidden;
     display: grid;
-    grid-template-rows: 64px 1fr 160px 48px;
-    grid-template-columns: 1fr 340px;
-    gap: 0;
+    grid-template-rows: 56px 1fr 44px;
+    grid-template-columns: 1fr 1fr;
     background-image:
-      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(240,180,41,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 85% 100%, rgba(64,196,255,0.03) 0%, transparent 60%);
+      radial-gradient(ellipse 50% 40% at 10% 0%, rgba(240,180,41,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 50% at 90% 100%, rgba(64,196,255,0.04) 0%, transparent 55%);
   }
 
-  /* HEADER */
+  /* ── HEADER ── */
   header {
-    grid-column: 1/-1;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 28px;
+    grid-column: 1/-1; grid-row: 1;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 32px;
     border-bottom: 1px solid var(--border);
-    background: rgba(14,18,25,0.98);
+    background: rgba(13,17,23,0.98);
+    z-index: 10;
   }
-  .brand { display:flex; align-items:baseline; gap:12px; }
+  .brand { display:flex; align-items:baseline; gap:14px; }
   .brand-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem; letter-spacing: 5px; color: var(--gold); line-height:1;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.9rem; letter-spacing:5px; color:var(--gold); line-height:1;
   }
   .brand-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem; letter-spacing: 3px; color: var(--text-dim); text-transform:uppercase;
+    font-family:'DM Mono',monospace;
+    font-size:0.65rem; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase;
   }
   .live-pill {
     display:flex; align-items:center; gap:7px;
-    background: rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2);
-    border-radius:20px; padding:5px 12px;
-    font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:2px;
+    background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2);
+    border-radius:20px; padding:5px 14px;
+    font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:2px;
     color:var(--green); text-transform:uppercase;
   }
-  .live-dot {
-    width:6px; height:6px; border-radius:50%; background:var(--green);
-    animation: livepulse 2s ease-in-out infinite;
-  }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:livepulse 2s ease-in-out infinite; }
   @keyframes livepulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 
-  /* LEADERBOARD TILE — top left */
-  .tile-leaderboard {
-    grid-column: 1; grid-row: 2;
-    padding: 12px 12px 12px 24px;
-    border-right: 1px solid var(--border);
+  /* ── MIDDLE ROW ── */
+  .middle-row {
+    grid-column: 1/-1; grid-row: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     overflow: hidden;
-    display: flex; flex-direction: column; gap: 0;
+  }
+
+  /* ── LEFT: LEADERBOARD ── */
+  .tile-leaderboard {
+    border-right: 1px solid var(--border);
+    padding: 16px 16px 16px 24px;
+    display: flex; flex-direction:column; overflow:hidden;
   }
   .tile-label {
-    font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:3px;
-    color:var(--text-dim); text-transform:uppercase; margin-bottom:8px; padding-left:2px;
+    font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;
   }
-  .rep-list { display:flex; flex-direction:column; gap:4px; flex:1; overflow:hidden; }
+  .rep-list { display:flex; flex-direction:column; gap:5px; flex:1; overflow:hidden; }
 
+  /* Rep row with outlined cells */
   .rep-row {
-    display:grid;
-    grid-template-columns: 38px 160px 1fr 90px 76px 68px 60px;
-    align-items:center; gap:8px;
-    padding:6px 12px;
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:5px; position:relative; overflow:hidden;
-    opacity:0; transform:translateX(-12px);
+    display: grid;
+    grid-template-columns: 36px 1fr 130px 80px 72px 68px;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0; transform: translateX(-10px);
+    background: var(--surface);
   }
   .rep-row.visible { animation: rowIn 0.35s ease forwards; }
   @keyframes rowIn { to { opacity:1; transform:translateX(0); } }
-  .rep-row::after {
-    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-  }
-  .rep-row.r1::after { background:var(--gold); }
-  .rep-row.r2::after { background:#b0bec5; }
-  .rep-row.r3::after { background:#a0785a; }
-  .rep-row.rother::after { background:var(--border2); }
-  .rep-row.r1 {
-    background:linear-gradient(90deg,rgba(240,180,41,0.07) 0%,var(--surface) 30%);
-    border-color:rgba(240,180,41,0.2);
-  }
 
-  .rank-badge {
-    font-family:'Bebas Neue',sans-serif; font-size:1.3rem;
-    letter-spacing:1px; text-align:center; line-height:1;
-  }
-  .r1 .rank-badge { color:var(--gold); }
-  .r2 .rank-badge { color:#b0bec5; }
-  .r3 .rank-badge { color:#a0785a; }
-  .rother .rank-badge { color:var(--text-dim); }
+  .rep-row.r1 { border-color: rgba(240,180,41,0.3); background: linear-gradient(90deg, rgba(240,180,41,0.06) 0%, var(--surface) 25%); }
+  .rep-row.r2 { border-color: rgba(176,190,197,0.2); }
+  .rep-row.r3 { border-color: rgba(160,120,90,0.2); }
 
-  .rep-name-col {}
-  .rep-name { font-size:0.9rem; font-weight:700; color:var(--text); letter-spacing:0.2px; white-space:nowrap; }
+  .cell {
+    padding: 8px 10px;
+    display: flex; flex-direction:column; justify-content:center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .cell:last-child { border-right: none; }
+  .cell.rank-cell {
+    align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.02);
+    min-width: 36px;
+  }
+  .cell.name-cell { padding: 8px 12px; }
+
+  .rank-num {
+    font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:1px; line-height:1;
+  }
+  .r1 .rank-num { color:var(--gold); }
+  .r2 .rank-num { color:#b0bec5; }
+  .r3 .rank-num { color:#a0785a; }
+  .rother .rank-num { color:var(--text-dim); }
+
+  .rep-name { font-size:0.95rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .rep-bar-wrap { height:2px; background:var(--border2); border-radius:2px; margin-top:4px; overflow:hidden; }
   .rep-bar { height:100%; border-radius:2px; background:var(--green-dim); width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
   .r1 .rep-bar { background:var(--gold); }
   .r2 .rep-bar { background:#b0bec5; }
   .r3 .rep-bar { background:#a0785a; }
 
-  .metric-cell { text-align:right; }
-  .metric-val { font-family:'DM Mono',monospace; font-size:0.8rem; font-weight:500; color:var(--text); }
-  .metric-val.highlight { color:var(--green); }
-  .metric-val.gold-text { color:var(--gold); }
-  .metric-label { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:1px; color:var(--text-dim); text-transform:uppercase; margin-top:1px; }
+  .cell-val { font-family:'DM Mono',monospace; font-size:0.88rem; font-weight:500; color:var(--text); text-align:right; }
+  .cell-val.rev { color:var(--gold); }
+  .r1 .cell-val.rev { color:var(--gold); }
+  .cell-val.grn { color:var(--green); }
+  .cell-lbl { font-family:'DM Mono',monospace; font-size:0.48rem; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-top:2px; text-align:right; }
 
-  /* KPI TILE — top right */
+  /* Column header row */
+  .rep-header {
+    display: grid;
+    grid-template-columns: 36px 1fr 130px 80px 72px 68px;
+    gap: 0;
+    margin-bottom: 4px;
+    padding: 0 0 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .col-head {
+    font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:1.5px;
+    color:var(--text-dim); text-transform:uppercase; text-align:right; padding:0 10px;
+  }
+  .col-head:first-child { text-align:center; }
+  .col-head.name-h { text-align:left; padding-left:12px; }
+
+  /* ── RIGHT: KPIs + TOP PERFORMER ── */
   .tile-kpi {
-    grid-column: 2; grid-row: 2;
-    display: flex; flex-direction: column;
+    display: grid;
+    grid-template-rows: repeat(4, 1fr) 1.6fr;
     overflow: hidden;
   }
 
   .kpi-block {
-    padding: 14px 18px;
+    padding: 0 28px;
     border-bottom: 1px solid var(--border);
+    display: flex; flex-direction:column; justify-content:center;
+    position: relative;
   }
-  .kpi-block-label {
-    font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:3px;
+  .kpi-block::before {
+    content:''; position:absolute; left:0; top:20%; bottom:20%; width:3px; border-radius:2px;
+  }
+  .kpi-block:nth-child(1)::before { background:var(--gold); }
+  .kpi-block:nth-child(2)::before { background:var(--green); }
+  .kpi-block:nth-child(3)::before { background:var(--blue); }
+  .kpi-block:nth-child(4)::before { background:var(--text-dim); }
+
+  .kpi-lbl {
+    font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:3px;
     color:var(--text-dim); text-transform:uppercase; margin-bottom:4px;
   }
-  .kpi-block-val {
-    font-family:'Bebas Neue',sans-serif; font-size:2.4rem;
-    letter-spacing:2px; line-height:1;
-  }
-  .kpi-block-val.gold { color:var(--gold); }
-  .kpi-block-val.green { color:var(--green); }
-  .kpi-block-val.blue { color:var(--blue); }
-  .kpi-block-val.white { color:var(--text); }
-
-  /* Rotating top performer */
-  .top-block {
-    flex:1; padding:14px 18px;
-    display:flex; flex-direction:column;
-    background:linear-gradient(135deg,rgba(240,180,41,0.06),rgba(240,180,41,0.01));
-    border-bottom: 1px solid var(--border);
-  }
-  .top-block-label {
-    font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:2px;
-    color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;
-  }
-  .top-card-inner { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-  .top-crown { font-size:1.6rem; margin-bottom:4px; }
-  .top-name {
-    font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:3px;
-    color:var(--gold); line-height:1; transition:opacity 0.3s ease;
-  }
-  .top-value { font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text-mid); margin-top:5px; transition:opacity 0.3s ease; }
-
-  /* PACE TRACKER — bottom tile */
-  .tile-pace {
-    grid-column: 1/-1; grid-row: 3;
-    border-top: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-    padding: 0;
-    background: var(--surface);
-  }
-  .pace-block {
-    padding: 18px 28px;
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction:column; justify-content:center;
-  }
-  .pace-block:last-child { border-right:none; }
-  .pace-label {
-    font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px;
-    color:var(--text-dim); text-transform:uppercase; margin-bottom:8px;
-  }
-  .pace-val {
+  .kpi-num {
     font-family:'Bebas Neue',sans-serif; font-size:3.2rem;
     letter-spacing:2px; line-height:1;
   }
-  .pace-val.ahead { color:var(--green); }
-  .pace-val.behind { color:var(--red); }
-  .pace-val.neutral { color:var(--gold); }
-  .pace-sub {
-    font-family:'DM Mono',monospace; font-size:0.65rem;
-    color:var(--text-dim); margin-top:5px;
-  }
-  .pace-bar-wrap {
-    height:6px; background:var(--border2); border-radius:3px;
-    margin-top:10px; overflow:hidden; position:relative;
-  }
-  .pace-bar {
-    height:100%; border-radius:3px; width:0%;
-    transition:width 1.4s cubic-bezier(0.4,0,0.2,1);
-  }
-  .pace-bar.month { background:var(--blue); }
-  .pace-bar.deals { background:var(--green); }
-  .pace-bar.behind-bar { background:var(--red); }
+  .kpi-num.gold { color:var(--gold); }
+  .kpi-num.green { color:var(--green); }
+  .kpi-num.blue { color:var(--blue); }
+  .kpi-num.white { color:var(--text); }
 
-  /* STATUS block — pace delta */
-  .pace-status {
-    display:flex; flex-direction:column; justify-content:center; align-items:center;
-    text-align:center;
+  /* Top performer */
+  .top-block {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex; flex-direction:column;
+    background: linear-gradient(135deg, rgba(240,180,41,0.06) 0%, transparent 60%);
   }
-  .pace-delta-label {
-    font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:2px;
-    color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;
+  .top-lbl {
+    font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;
   }
-  .pace-delta-val {
-    font-family:'Bebas Neue',sans-serif; font-size:2.6rem; letter-spacing:2px; line-height:1;
+  .top-inner { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .top-crown { font-size:1.8rem; margin-bottom:4px; }
+  .top-name {
+    font-family:'Bebas Neue',sans-serif; font-size:2.6rem; letter-spacing:3px;
+    color:var(--gold); line-height:1; transition:opacity 0.3s ease;
   }
-  .pace-delta-val.ahead { color:var(--green); }
-  .pace-delta-val.behind { color:var(--red); }
-  .pace-note {
-    font-family:'DM Mono',monospace; font-size:0.62rem;
-    color:var(--text-mid); margin-top:6px; max-width:200px; text-align:center; line-height:1.5;
+  .top-val { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-mid); margin-top:6px; transition:opacity 0.3s ease; }
+
+  /* ── BOTTOM: PACE TRACKER ── */
+  .tile-pace {
+    grid-column: 1/-1; grid-row: 2;
+    display: none; /* toggled by JS — hidden until we position it */
   }
 
-  /* TICKER */
+  /* ── FOOTER ── */
   footer {
-    grid-column:1/-1; grid-row:4;
+    grid-column:1/-1; grid-row:3;
     border-top:1px solid var(--border); background:var(--surface);
     display:flex; align-items:center; padding:0 20px; gap:12px; overflow:hidden;
   }
   .ticker-label {
     font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:3px; color:var(--gold);
     text-transform:uppercase; flex-shrink:0; background:rgba(240,180,41,0.1);
-    border:1px solid rgba(240,180,41,0.2); padding:3px 9px; border-radius:4px;
+    border:1px solid rgba(240,180,41,0.2); padding:3px 10px; border-radius:4px;
   }
   .ticker-conv {
-    font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:2px; color:var(--green);
+    font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:1.5px; color:var(--green);
     background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.2);
-    border-radius:4px; padding:3px 9px; flex-shrink:0;
+    border-radius:4px; padding:3px 10px; flex-shrink:0;
   }
   .ticker-track { flex:1; overflow:hidden; position:relative; height:100%; display:flex; align-items:center; }
-  .ticker-inner { display:flex; gap:48px; white-space:nowrap; animation:tickerScroll 60s linear infinite; }
+  .ticker-inner { display:flex; gap:52px; white-space:nowrap; animation:tickerScroll 60s linear infinite; }
   @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-  .ticker-item {
-    font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--text-mid);
-    display:flex; align-items:center; gap:8px; flex-shrink:0;
-  }
+  .ticker-item { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--text-mid); display:flex; align-items:center; gap:8px; flex-shrink:0; }
   .ticker-item .dot { width:4px; height:4px; border-radius:50%; background:var(--gold); flex-shrink:0; }
   .ticker-item strong { color:var(--text); font-weight:700; }
   .ticker-item .amt { color:var(--green); }
   .refresh-info { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:1.5px; color:var(--text-dim); flex-shrink:0; text-transform:uppercase; }
 
-  .status-msg { font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text-dim); padding:16px; text-align:center; }
-  .error-msg { font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--red); padding:16px; text-align:center; }
+  /* ── PACE OVERLAY ── */
+  .pace-overlay {
+    position: fixed;
+    bottom: 44px; left: 0; right: 0;
+    height: 48vh;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    z-index: 5;
+    background-image: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(240,180,41,0.04) 0%, transparent 70%);
+  }
+  .pace-block {
+    padding: 28px 36px;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction:column; justify-content:center;
+  }
+  .pace-block:last-child { border-right:none; }
+  .pace-lbl {
+    font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:3px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;
+  }
+  .pace-big {
+    font-family:'Bebas Neue',sans-serif; font-size:6rem;
+    letter-spacing:2px; line-height:1;
+  }
+  .pace-big.neutral { color:var(--gold); }
+  .pace-big.ahead { color:var(--green); }
+  .pace-big.behind { color:var(--red); }
+  .pace-sub { font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--text-dim); margin-top:8px; }
+  .pace-bar-wrap { height:8px; background:var(--border2); border-radius:4px; margin-top:14px; overflow:hidden; }
+  .pace-bar { height:100%; border-radius:4px; width:0%; transition:width 1.4s cubic-bezier(0.4,0,0.2,1); }
+  .pace-bar.month-bar { background:var(--blue); }
+  .pace-bar.deals-bar { background:var(--green); }
+  .pace-bar.behind-bar { background:var(--red); }
+
+  .pace-status-block {
+    display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+  }
+  .pace-delta-lbl { font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; }
+  .pace-delta-big { font-family:'Bebas Neue',sans-serif; font-size:5rem; letter-spacing:2px; line-height:1; }
+  .pace-delta-big.ahead { color:var(--green); }
+  .pace-delta-big.behind { color:var(--red); }
+  .pace-note { font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--text-mid); margin-top:10px; line-height:1.6; max-width:240px; }
+
+  /* Pace toggle button */
+  .pace-toggle {
+    position: fixed; bottom: 52px; right: 20px;
+    font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:2px;
+    color:var(--text-dim); background:var(--surface2); border:1px solid var(--border2);
+    border-radius:4px; padding:4px 10px; cursor:pointer; z-index:20;
+    text-transform:uppercase; transition:color 0.2s;
+    display:none;
+  }
+  .pace-toggle:hover { color:var(--gold); border-color:var(--gold); }
+
+  /* Deal flash overlay */
+  .deal-flash {
+    position: fixed; inset: 0; z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(255,60,60,0.18) 0%, rgba(255,0,0,0.08) 60%, transparent 100%);
+    border: 3px solid rgba(255,80,80,0.6);
+    animation: none;
+  }
+  .deal-flash.firing {
+    animation: dealFlash 1.8s ease-out forwards;
+  }
+  @keyframes dealFlash {
+    0%   { opacity: 1; border-color: rgba(255,80,80,0.9); }
+    15%  { opacity: 0.9; }
+    35%  { opacity: 0.7; border-color: rgba(255,80,80,0.5); }
+    60%  { opacity: 0.3; }
+    100% { opacity: 0; border-color: transparent; }
+  }
+  .deal-toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    z-index: 10000; pointer-events: none;
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 4px;
+    color: #fff; text-shadow: 0 0 30px rgba(255,80,80,0.9);
+    opacity: 0; animation: none;
+  }
+  .deal-toast.firing {
+    animation: toastPop 1.8s ease-out forwards;
+  }
+  @keyframes toastPop {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    12%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  }
+
+  .status-msg { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--text-dim); padding:20px; text-align:center; }
+  .error-msg { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--red); padding:20px; text-align:center; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .loading { animation:blink 1.4s ease-in-out infinite; }
 </style>
@@ -277,64 +346,80 @@
   <div class="live-pill"><div class="live-dot"></div>Live</div>
 </header>
 
-<!-- TOP LEFT: Leaderboard -->
-<div class="tile-leaderboard">
-  <div class="tile-label">Leaderboard — Contract Value</div>
-  <div class="rep-list" id="rep-list">
-    <div class="status-msg loading">Connecting to live data...</div>
-  </div>
-</div>
+<div class="middle-row">
 
-<!-- TOP RIGHT: KPI + Rotating Top Performer -->
-<div class="tile-kpi">
-  <div class="kpi-block">
-    <div class="kpi-block-label">Total Deals MTD</div>
-    <div class="kpi-block-val gold" id="kpi-deals-mtd">—</div>
-  </div>
-  <div class="kpi-block">
-    <div class="kpi-block-label">Completed Calls</div>
-    <div class="kpi-block-val green" id="kpi-completed">—</div>
-  </div>
-  <div class="kpi-block">
-    <div class="kpi-block-label">Avg Show Rate</div>
-    <div class="kpi-block-val blue" id="kpi-show">—</div>
-  </div>
-  <div class="kpi-block">
-    <div class="kpi-block-label">Total Bookings</div>
-    <div class="kpi-block-val white" id="kpi-bookings">—</div>
-  </div>
-  <div class="top-block">
-    <div class="top-block-label" id="top-category-label">Top Performer</div>
-    <div class="top-card-inner">
-      <div class="top-crown" id="top-crown">👑</div>
-      <div class="top-name" id="top-name">—</div>
-      <div class="top-value" id="top-value">—</div>
+  <!-- LEFT: Leaderboard -->
+  <div class="tile-leaderboard">
+    <div class="tile-label">Leaderboard — Contract Value</div>
+    <div class="rep-header">
+      <div class="col-head">#</div>
+      <div class="col-head name-h">Rep</div>
+      <div class="col-head">Contract $</div>
+      <div class="col-head">Bookings</div>
+      <div class="col-head">Show%</div>
+      <div class="col-head">Deals</div>
+    </div>
+    <div class="rep-list" id="rep-list">
+      <div class="status-msg loading">Connecting to live data...</div>
     </div>
   </div>
-</div>
 
-<!-- BOTTOM: Pace Tracker -->
-<div class="tile-pace">
+  <!-- RIGHT: KPIs + Top Performer -->
+  <div class="tile-kpi">
+    <div class="kpi-block">
+      <div class="kpi-lbl">Total Deals MTD</div>
+      <div class="kpi-num gold" id="kpi-deals-mtd">—</div>
+    </div>
+    <div class="kpi-block">
+      <div class="kpi-lbl">Completed Calls</div>
+      <div class="kpi-num green" id="kpi-completed">—</div>
+    </div>
+    <div class="kpi-block">
+      <div class="kpi-lbl">Avg Show Rate</div>
+      <div class="kpi-num blue" id="kpi-show">—</div>
+    </div>
+    <div class="kpi-block">
+      <div class="kpi-lbl">Total Bookings</div>
+      <div class="kpi-num white" id="kpi-bookings">—</div>
+    </div>
+    <div class="top-block">
+      <div class="top-lbl" id="top-category-label">Top Performer</div>
+      <div class="top-inner">
+        <div class="top-crown" id="top-crown">👑</div>
+        <div class="top-name" id="top-name">—</div>
+        <div class="top-val" id="top-value">—</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end middle-row -->
+
+<!-- PACE TRACKER OVERLAY -->
+<div class="pace-overlay" id="pace-overlay">
   <div class="pace-block">
-    <div class="pace-label">Month Progress</div>
-    <div class="pace-val neutral" id="pace-month-pct">—</div>
+    <div class="pace-lbl">Month Progress</div>
+    <div class="pace-big neutral" id="pace-month-pct">—</div>
     <div class="pace-sub" id="pace-month-sub">Day — of —</div>
-    <div class="pace-bar-wrap"><div class="pace-bar month" id="pace-month-bar"></div></div>
+    <div class="pace-bar-wrap"><div class="pace-bar month-bar" id="pace-month-bar"></div></div>
   </div>
   <div class="pace-block">
-    <div class="pace-label">Goal Progress — 200 Deals</div>
-    <div class="pace-val" id="pace-deals-pct">—</div>
+    <div class="pace-lbl">Goal Progress — 200 Deals</div>
+    <div class="pace-big" id="pace-deals-pct">—</div>
     <div class="pace-sub" id="pace-deals-sub">— of 200 deals</div>
-    <div class="pace-bar-wrap"><div class="pace-bar deals" id="pace-deals-bar"></div></div>
+    <div class="pace-bar-wrap"><div class="pace-bar deals-bar" id="pace-deals-bar"></div></div>
   </div>
-  <div class="pace-block pace-status">
-    <div class="pace-delta-label" id="pace-status-label">Pace Status</div>
-    <div class="pace-delta-val" id="pace-delta">—</div>
+  <div class="pace-block pace-status-block">
+    <div class="pace-delta-lbl" id="pace-status-label">Pace Status</div>
+    <div class="pace-delta-big" id="pace-delta">—</div>
     <div class="pace-note" id="pace-note">Calculating...</div>
   </div>
 </div>
 
-<!-- TICKER -->
+<!-- Deal flash overlay -->
+<div class="deal-flash" id="deal-flash"></div>
+<div class="deal-toast" id="deal-toast">🔥 DEAL CLOSED</div>
+
+<!-- FOOTER TICKER -->
 <footer>
   <div class="ticker-label">Today</div>
   <div class="ticker-conv">Team Conv: <span id="team-conv">—</span></div>
@@ -472,32 +557,27 @@ function render(rows) {
 
     const row = document.createElement('div');
     row.className = `rep-row ${rc}`;
-    const convDisplay = rep.convPct !== null ? rep.convPct.toFixed(1)+'%' : '—';
     row.innerHTML = `
-      <div class="rank-badge">${i+1}</div>
-      <div class="rep-name-col">
+      <div class="cell rank-cell"><div class="rank-num">${i+1}</div></div>
+      <div class="cell name-cell">
         <div class="rep-name">${rep.name}</div>
-        <div class="rep-bar-wrap"><div class="rep-bar" style="width:0%" data-w="${pct}"></div></div>
+        <div class="rep-bar-wrap"><div class="rep-bar" style="width:0%"></div></div>
       </div>
-      <div class="metric-cell">
-        <div class="metric-val ${i===0?'gold-text':'highlight'}">${fmtMoneyFull(rep.revenue)}</div>
-        <div class="metric-label">Contract Value</div>
+      <div class="cell">
+        <div class="cell-val rev">${fmtMoneyFull(rep.revenue)}</div>
+        <div class="cell-lbl">Contract Value</div>
       </div>
-      <div class="metric-cell">
-        <div class="metric-val">${rep.bookings}</div>
-        <div class="metric-label">Bookings</div>
+      <div class="cell">
+        <div class="cell-val">${rep.bookings}</div>
+        <div class="cell-lbl">Bookings</div>
       </div>
-      <div class="metric-cell">
-        <div class="metric-val">${showDisplay}</div>
-        <div class="metric-label">Show Rate</div>
+      <div class="cell">
+        <div class="cell-val ${rep.showPct !== null && rep.showPct>=70?'grn':''}">${showDisplay}</div>
+        <div class="cell-lbl">Show Rate</div>
       </div>
-      <div class="metric-cell">
-        <div class="metric-val">${rep.totalDeals}</div>
-        <div class="metric-label">Deals</div>
-      </div>
-      <div class="metric-cell">
-        <div class="metric-val">${convDisplay}</div>
-        <div class="metric-label">Conv%</div>
+      <div class="cell">
+        <div class="cell-val ${rep.totalDeals>=15?'grn':''}">${rep.totalDeals}</div>
+        <div class="cell-lbl">Deals</div>
       </div>`;
     repList.appendChild(row);
 
@@ -619,12 +699,44 @@ function setRotateReps(reps) {
 
 setInterval(rotateTopPerformer, 8000);
 
+let _prevDealCount = null;
+
+function fireDealFlash(repName) {
+  const flash = document.getElementById('deal-flash');
+  const toast = document.getElementById('deal-toast');
+  if (!flash || !toast) return;
+  // Reset
+  flash.classList.remove('firing');
+  toast.classList.remove('firing');
+  toast.textContent = repName ? '🔥 ' + repName.toUpperCase() + ' — DEAL CLOSED' : '🔥 DEAL CLOSED';
+  // Force reflow then fire
+  void flash.offsetWidth;
+  flash.classList.add('firing');
+  toast.classList.add('firing');
+  // Clean up after animation
+  setTimeout(() => {
+    flash.classList.remove('firing');
+    toast.classList.remove('firing');
+  }, 1900);
+}
+
 async function fetchData() {
   try {
     const res  = await fetch(CSV_URL + '&nocache=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    render(parseCSV(text));
+    const rows = parseCSV(text);
+    // Check for new deals before render
+    const totalRow = rows.find(r => (r[1]||'').toLowerCase().trim() === 'total');
+    if (totalRow) {
+      const currentDeals = parseInt(totalRow[10]) || 0;
+      if (_prevDealCount !== null && currentDeals > _prevDealCount) {
+        // Find who just closed — rep with most recent deal
+        fireDealFlash(null);
+      }
+      _prevDealCount = currentDeals;
+    }
+    render(rows);
   } catch(err) {
     console.error(err);
     document.getElementById('rep-list').innerHTML =
