@@ -510,37 +510,9 @@ function render(rows) {
     }, i*80);
   });
 
-  // Deals vs KPI panel (gold bars, goal = 15 deals/month)
-  const REP_DEAL_GOAL = 15;
-  const showList = document.getElementById('show-list');
-  showList.innerHTML = '';
-  [...reps].sort((a,b) => b.totalDeals - a.totalDeals)
-    .forEach(rep => {
-      const pctOfGoal = Math.min((rep.totalDeals / REP_DEAL_GOAL) * 100, 100);
-      const hitGoal = rep.totalDeals >= REP_DEAL_GOAL;
-      const d = document.createElement('div');
-      d.className = 'show-row';
-      d.innerHTML = `
-        <div class="show-name">${rep.name}</div>
-        <div class="show-bar-wrap"><div class="show-bar" style="width:0%;${hitGoal?'background:var(--green)':''}" data-w="${pctOfGoal}"></div></div>
-        <div class="show-pct" style="${hitGoal?'color:var(--green)':''}">${rep.totalDeals}</div>`;
-      showList.appendChild(d);
-      setTimeout(() => { const b = d.querySelector('.show-bar'); if(b) b.style.width = pctOfGoal+'%'; }, 700);
-    });
+  // Deals KPI panel removed — now shown in leaderboard conv% column
 
-  // Conversion panel
-  const convList = document.getElementById('conv-list');
-  convList.innerHTML = '';
-  [...reps].sort((a,b) => (b.convPct||0)-(a.convPct||0))
-    .forEach(rep => {
-      const zero = !rep.convPct;
-      const d = document.createElement('div');
-      d.className = 'conv-row';
-      d.innerHTML = `
-        <div class="conv-name">${rep.name}</div>
-        <div class="conv-badge ${zero?'zero':''}">${rep.convPct !== null ? rep.convPct.toFixed(1)+'%' : '—'}</div>`;
-      convList.appendChild(d);
-    });
+  // Conv panel removed — now shown in leaderboard conv% column
 
   // Ticker
   const items = [];
