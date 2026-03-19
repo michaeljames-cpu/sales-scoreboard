@@ -18,6 +18,8 @@
     --green-dim: #00c853;
     --blue: #40c4ff;
     --red: #ff4444;
+    --red-dark: #7a0000;
+    --yellow: #f0b429;
     --text: #e4eaf2;
     --text-dim: #5a7080;
     --text-mid: #8aa0b4;
@@ -70,7 +72,7 @@
     display: grid;
     grid-template-columns: 55% 45%;
     overflow: hidden;
-    padding-bottom: 46vh;
+    padding-bottom: 50vh;
   }
 
   /* ── LEFT: LEADERBOARD ── */
@@ -88,7 +90,7 @@
   /* Rep row with outlined cells */
   .rep-row {
     display: grid;
-    grid-template-columns: 36px 1fr 130px 80px 72px 68px;
+    grid-template-columns: 36px 1fr 130px 76px 80px 64px;
     align-items: stretch;
     gap: 0;
     border: 1px solid var(--border);
@@ -142,7 +144,7 @@
   /* Column header row */
   .rep-header {
     display: grid;
-    grid-template-columns: 36px 1fr 130px 80px 72px 68px;
+    grid-template-columns: 36px 1fr 130px 76px 80px 64px;
     gap: 0;
     margin-bottom: 4px;
     padding: 0 0 4px 0;
@@ -243,16 +245,17 @@
   .pace-overlay {
     position: fixed;
     bottom: 44px; left: 0; right: 0;
-    height: 46vh;
+    height: 50vh;
     background: var(--bg);
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
+    transition: border-top-color 1s ease;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     z-index: 5;
     background-image: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(240,180,41,0.04) 0%, transparent 70%);
   }
   .pace-block {
-    padding: 28px 36px;
+    padding: 20px 36px;
     border-right: 1px solid var(--border);
     display: flex; flex-direction:column; justify-content:center;
   }
@@ -414,6 +417,12 @@
     <div class="pace-delta-big" id="pace-delta">—</div>
     <div class="pace-note" id="pace-note">Calculating...</div>
   </div>
+  <div class="pace-block">
+    <div class="pace-lbl">Team Conversion</div>
+    <div class="pace-big" id="pace-conv" style="color:var(--text-mid)">—</div>
+    <div class="pace-sub">Bookings → Sign Ups</div>
+    <div class="pace-bar-wrap"><div class="pace-bar month-bar" id="pace-conv-bar" style="background:var(--green)"></div></div>
+  </div>
 </div>
 
 <!-- Deal flash overlay -->
@@ -535,7 +544,11 @@ function render(rows) {
   const teamCompleted = reps.reduce((s,r) => s+r.completed, 0);
   // KPI tile
   document.getElementById('kpi-show').textContent     = avgShow + '%';
-  document.getElementById('kpi-bookings').textContent = teamBk;
+  const bkEl = document.getElementById('kpi-bookings');
+  if (bkEl) {
+    bkEl.textContent = teamBk;
+    bkEl.style.color = teamBk >= 120 ? 'var(--green)' : 'var(--text)';
+  }
 
   const now = new Date();
   document.getElementById('date-display').textContent =
@@ -569,7 +582,7 @@ function render(rows) {
         <div class="cell-lbl">Contract Value</div>
       </div>
       <div class="cell">
-        <div class="cell-val">${rep.bookings}</div>
+        <div class="cell-val ${rep.bookings>=120?'grn':''}">${rep.bookings}</div>
         <div class="cell-lbl">Bookings</div>
       </div>
       <div class="cell">
@@ -611,9 +624,20 @@ function render(rows) {
 
   // Team conversion from total row col L (index 11)
   const teamConvEl = document.getElementById('team-conv');
-  if (teamConvEl && totalRow) {
+  const paceConvEl = document.getElementById('pace-conv');
+  const paceConvBar = document.getElementById('pace-conv-bar');
+  if (totalRow) {
     const tc = parsePct(totalRow[11]);
-    teamConvEl.textContent = tc !== null ? tc.toFixed(1) + '%' : '—';
+    const tcStr = tc !== null ? tc.toFixed(1) + '%' : '—';
+    if (teamConvEl) teamConvEl.textContent = tcStr;
+    if (paceConvEl) {
+      paceConvEl.textContent = tcStr;
+      // Color based on conversion rate thresholds
+      if (tc !== null) {
+        paceConvEl.style.color = tc >= 15 ? 'var(--green)' : tc >= 8 ? 'var(--yellow)' : 'var(--text-mid)';
+        setTimeout(() => { if (paceConvBar) paceConvBar.style.width = Math.min(tc * 4, 100) + '%'; }, 900);
+      }
+    }
   }
 
   // Team total deals from K42 (index 10), completed from D (index 3)
