@@ -671,7 +671,7 @@ function render(rows) {
   document.getElementById('pace-month-sub').textContent  = 'Day ' + dayOfMonth + ' of ' + daysInMonth;
   document.getElementById('pace-deals-pct').textContent  = dealsPct + '%';
   document.getElementById('pace-deals-sub').textContent  = totalDealsVal + ' of ' + DEAL_GOAL + ' deals';
-  document.getElementById('pace-delta').textContent      = (isAhead ? '+' : '') + delta + ' deals';
+  document.getElementById('pace-delta').textContent      = (isAhead ? '+' : '') + delta;
   document.getElementById('pace-status-label').textContent = isAhead ? 'Ahead of Pace 🔥' : 'Behind Pace';
   document.getElementById('pace-note').textContent       = isAhead
     ? 'On track — need ' + dealsNeededAtPace + ' by today to stay on pace'
